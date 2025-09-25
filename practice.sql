@@ -5,37 +5,37 @@ FROM countries;
 
 -- 問2
 -- ヨーロッパに属する国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
-WHERE continent = 'Europe'
+WHERE continent = 'Europe';
 
 
 -- 問3
 -- ヨーロッパ以外に属する国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE continent != 'Europe';
 
 -- 問4
 -- 人口が10万人以上の国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE population >= 100000;
 
 -- 問5
 -- 平均寿命が56歳から76歳の国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE life_expectancy BETWEEN 56 AND 76;
 -- 問6
 -- 国コードがNLB,ALB,DZAのもの市区町村をすべて抽出してください。
-SELECT name
+SELECT *
 FROM cities
 WHERE country_code IN ('NLB', 'ALB', 'DZA');
 
 -- 問7
 -- 独立独立記念日がない国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE indep_year IS NULL;
 
@@ -43,37 +43,37 @@ WHERE indep_year IS NULL;
 
 -- 問8
 -- 独立独立記念日がある国をすべて抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE indep_year IS NOT NULL;
 
 -- 問9
 -- 名前の末尾が「ia」で終わる国を抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE TRIM(name) LIKE '%ia';
 
 -- 問10
 -- 名前の中に「st」が含まれる国を抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE TRIM(name) ILIKE '%st%';
 
 -- 問11
 -- 名前が「an」で始まる国を抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE TRIM(name) ILIKE 'an%';
 
 -- 問12
 -- 全国の中から独立記念日が1990年より前または人口が10万人より多い国を全て抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE indep_year < 1990 OR population >= 100000;
 
 -- 問13
 -- コードがDZAもしくはALBかつ独立記念日が1990年より前の国を全て抽出してください。
-SELECT name
+SELECT *
 FROM countries
 WHERE (code = 'DZA' OR code = 'ALB') AND indep_year < 1990;
 
@@ -107,7 +107,6 @@ ORDER BY life_expectancy DESC;
 -- 平均寿命が長い順、独立記念日が新しい順に国を表示させてください。
 SELECT name, life_expectancy, indep_year
 FROM countries
-WHERE life_expectancy IS NOT NULL
 ORDER BY life_expectancy DESC, indep_year DESC;
 
 -- 問19
@@ -157,7 +156,7 @@ SELECT c.name, cl.language
 FROM countries c
 JOIN country_languages cl
   ON c.code = cl.country_code
-ORDER BY c.name ASC, cl.language ASC;
+ORDER BY c.name, cl.language;
 
 -- 問26 全ての国と言語と市区町村を表示
 SELECT
@@ -176,7 +175,7 @@ ORDER BY
 
 -- 問27
 -- 全ての有名人を出力してください。左側外部結合を使用して国名なし（country_codeがNULL）も表示してください。
-SELECT cb.name, c.name
+SELECT cb.name, c.name, cb.country_code
 FROM celebrities cb
 LEFT JOIN countries c
   ON c.code = cb.country_code;
@@ -192,27 +191,20 @@ LEFT JOIN country_languages cl
   AND cl.is_official = 'T';
 
 -- 問29
--- 全ての有名人の名前と国名をに出力してください。 ただしテーブル結合せずサブクエリを使用してください。
--- country_code を CASE で国名に変換
-SELECT name,
-  CASE country_code
-    WHEN 'FRA' THEN 'France'
-    WHEN 'USA' THEN 'United States'
-    WHEN 'GBR' THEN 'United Kingdom'
-    WHEN 'AUS' THEN 'Australia'
-    WHEN 'PER' THEN 'Peru'
-    WHEN 'AUT' THEN 'Austria'
-    WHEN 'GRC' THEN 'Greece'
-    ELSE NULL
-  END AS "国名"
-FROM celebrities;
+-- 全ての有名人の名前と国名をに出力してください。 
 
+SELECT cb.name, (SELECT c.name
+FROM countries c
+WHERE c.code = cb.country_code)
+FROM celebrities  cb;
 
 -- 問30
 -- 最年長が50歳以上かつ最年少が30歳以下の国を表示させてください。
-SELECT country_code, MAX(age) AS "MAX(ce.age)", MIN(age) AS "MIN(ce.age)"
-FROM celebrities
-GROUP BY country_code
+SELECT cb.country_code, c.name, MAX(age) AS "MAX(ce.age)", MIN(age) AS "MIN(ce.age)"
+FROM celebrities cb
+JOIN countries c
+ON cb.country_code = c.code
+GROUP BY cb.country_code,c.name
 HAVING MAX(age) >= 50 AND MIN(age) <= 30;
 
 
